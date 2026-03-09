@@ -1,6 +1,6 @@
 # =============================================
-# Gravity - Edge Case Ready Version
-# Add your real edge cases in the section below
+# Gravity - With O.J. Simpson Edge Case (1995)
+# Tests procedural legitimacy under criminal standard
 # =============================================
 
 from datetime import datetime
@@ -36,26 +36,37 @@ class Gravity:
         witnesses = []
         value = Belnap.N
 
-        # ================== YOUR EDGE CASES GO HERE ==================
-        # Add your real rules below (I'll help you write them)
+        # ================== O.J. SIMPSON EDGE CASE (R1–R5) ==================
+        def r1_evidence_beyond_reasonable_doubt(events):
+            # DNA evidence supported guilt, but glove didn't fit → conflict
+            dna = any("dna" in e["payload"].lower() for e in events)
+            glove = any("glove" in e["payload"].lower() for e in events)
+            if dna and glove: return Belnap.B          # classic conflict
+            if dna: return Belnap.T
+            return Belnap.N
 
-        def clause_training_complete(events):
-            training_done = any(e["type"] == "training_completed" for e in events)
-            return Belnap.T if training_done else Belnap.N
+        def r2_prosecution_burden(events):
+            # Prosecution had burden but faced major issues
+            return Belnap.T if any("prosecution" in e["type"] for e in events) else Belnap.N
 
-        def clause_no_conflicts(events):
-            # Example: conflict if more than 3 events (you can change this)
-            return Belnap.B if len(events) > 3 else Belnap.T
+        def r3_acquit_on_doubt(events):
+            # Reasonable doubt existed (glove, timeline, etc.)
+            return Belnap.B if any("doubt" in e["payload"].lower() for e in events) else Belnap.T
 
-        # Add more clauses here ↓↓↓ (your real edge cases)
-        # Example: clause_sleep_cycle_ok, clause_no_active_investigation, etc.
+        def r4_procedural_fairness(events):
+            # Trial was fair in process but had media pressure
+            return Belnap.T if not any("media" in e["payload"].lower() for e in events) else Belnap.B
 
-        # =============================================================
+        def r5_criminal_standard_not_public_suspicion(events):
+            # Public pressure was enormous
+            return Belnap.B if any("public" in e["payload"].lower() for e in events) else Belnap.T
 
         clauses = [
-            ("Training Complete", clause_training_complete),
-            ("No Active Conflicts", clause_no_conflicts),
-            # Add your new clauses here
+            ("R1. Evidence Beyond Reasonable Doubt", r1_evidence_beyond_reasonable_doubt),
+            ("R2. Prosecution Bears Burden", r2_prosecution_burden),
+            ("R3. Acquit on Material Doubt", r3_acquit_on_doubt),
+            ("R4. Procedural Fairness", r4_procedural_fairness),
+            ("R5. Criminal Standard, Not Public Suspicion", r5_criminal_standard_not_public_suspicion),
         ]
 
         for name, func in clauses:
@@ -63,24 +74,30 @@ class Gravity:
             witnesses.append(f"{name}: {result}")
             value = Belnap.meet(value, result)
 
-        # Final rendering contract
+        # Rendering contract
         if value == Belnap.T:
-            return "APPROVE", f"✅ All clauses satisfied"
+            return "APPROVE", f"✅ Legitimate conviction"
         elif value == Belnap.F:
-            return "STOP", f"❌ DENIED: {witnesses}"
+            return "STOP", f"❌ Conviction illegitimate: {witnesses}"
         elif value == Belnap.B:
-            return "STOP", f"⚠️ CONFLICT: {witnesses}"
+            return "STOP", f"⚠️ CONFLICT (legitimacy unclear): {witnesses}"
         else:
-            return "STOP", f"❓ UNKNOWN: {witnesses}"
+            return "STOP", f"❓ UNKNOWN / insufficient evidence: {witnesses}"
 
-# ====================== TEST ======================
+# ====================== O.J. SIMPSON TEST CASE ======================
 if __name__ == "__main__":
     g = Gravity()
 
-    # Add your test events here
-    g.add_event("access_request", "lisa", "ethan", "sensitive_data")
-    g.add_event("training_completed", "system", "ethan", "compliance")
+    # Historical-style events for 3 Oct 1995 verdict
+    g.add_event("dna_evidence", "prosecution", "o.j.simpson", "murder_trial", "DNA match on blood")
+    g.add_event("glove_demonstration", "defense", "o.j.simpson", "murder_trial", "Glove did not fit")
+    g.add_event("jury_instruction", "judge", "o.j.simpson", "murder_trial", "Beyond reasonable doubt")
+    g.add_event("media_pressure", "public", "o.j.simpson", "murder_trial", "Massive public suspicion")
+    g.add_event("reasonable_doubt", "defense", "o.j.simpson", "murder_trial", "Timeline and witness conflicts")
 
-    result, explanation = g.evaluate("ethan", "sensitive_data", "compliance")
+    result, explanation = g.evaluate("o.j.simpson", "criminal_conviction", "murder_trial")
+    print("\n" + "="*60)
+    print("O.J. SIMPSON 1995 MURDER CONVICTION EVALUATION")
+    print("="*60)
     print("RESULT:", result)
     print("EXPLANATION:", explanation)
