@@ -1,6 +1,5 @@
 # =============================================
-# Gravity - With O.J. Simpson Edge Case (1995)
-# Tests procedural legitimacy under criminal standard
+# Gravity - O.J. Simpson Edge Case Ready
 # =============================================
 
 from datetime import datetime
@@ -36,29 +35,24 @@ class Gravity:
         witnesses = []
         value = Belnap.N
 
-        # ================== O.J. SIMPSON EDGE CASE (R1–R5) ==================
+        # O.J. Simpson 1995 clauses (R1-R5)
         def r1_evidence_beyond_reasonable_doubt(events):
-            # DNA evidence supported guilt, but glove didn't fit → conflict
             dna = any("dna" in e["payload"].lower() for e in events)
             glove = any("glove" in e["payload"].lower() for e in events)
-            if dna and glove: return Belnap.B          # classic conflict
+            if dna and glove: return Belnap.B
             if dna: return Belnap.T
             return Belnap.N
 
         def r2_prosecution_burden(events):
-            # Prosecution had burden but faced major issues
             return Belnap.T if any("prosecution" in e["type"] for e in events) else Belnap.N
 
         def r3_acquit_on_doubt(events):
-            # Reasonable doubt existed (glove, timeline, etc.)
             return Belnap.B if any("doubt" in e["payload"].lower() for e in events) else Belnap.T
 
         def r4_procedural_fairness(events):
-            # Trial was fair in process but had media pressure
-            return Belnap.T if not any("media" in e["payload"].lower() for e in events) else Belnap.B
+            return Belnap.B if any("media" in e["payload"].lower() for e in events) else Belnap.T
 
         def r5_criminal_standard_not_public_suspicion(events):
-            # Public pressure was enormous
             return Belnap.B if any("public" in e["payload"].lower() for e in events) else Belnap.T
 
         clauses = [
@@ -74,7 +68,6 @@ class Gravity:
             witnesses.append(f"{name}: {result}")
             value = Belnap.meet(value, result)
 
-        # Rendering contract
         if value == Belnap.T:
             return "APPROVE", f"✅ Legitimate conviction"
         elif value == Belnap.F:
@@ -84,11 +77,10 @@ class Gravity:
         else:
             return "STOP", f"❓ UNKNOWN / insufficient evidence: {witnesses}"
 
-# ====================== O.J. SIMPSON TEST CASE ======================
+# ====================== TEST ======================
 if __name__ == "__main__":
     g = Gravity()
 
-    # Historical-style events for 3 Oct 1995 verdict
     g.add_event("dna_evidence", "prosecution", "o.j.simpson", "murder_trial", "DNA match on blood")
     g.add_event("glove_demonstration", "defense", "o.j.simpson", "murder_trial", "Glove did not fit")
     g.add_event("jury_instruction", "judge", "o.j.simpson", "murder_trial", "Beyond reasonable doubt")
